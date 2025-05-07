@@ -85,7 +85,9 @@
       "model_type": "flux",
       "weight_dtype": "default"
     },
-    "_meta": { "title": "Load GetPhat V6 (Flux)" }
+    "_meta": {
+      "title": "Load GetPhat V6 (Flux)"
+    }
   },
   "11": {
     "inputs": {
@@ -101,7 +103,7 @@
   "12": {
     "class_type": "RandomNoise",
     "inputs": {
-      "seed": 324086323552613
+      "noise_seed": 324086323552613
     },
     "_meta": {
       "title": "Random Noise"
@@ -123,9 +125,9 @@
         "10",
         0
       ],
-      "schedule": "sgm_uniform",
+      "scheduler": "sgm_uniform",
       "steps": 35,
-      "sigma_min": 1
+      "denoise": 1.0
     },
     "_meta": {
       "title": "Basic Scheduler"
@@ -137,9 +139,7 @@
       "conditioning": [
         "4",
         0
-      ]
-    },
-    "widgets": {
+      ],
       "guidance": 4
     },
     "_meta": {
