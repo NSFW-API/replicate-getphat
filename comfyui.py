@@ -13,19 +13,16 @@ import shutil
 import custom_node_helpers as helpers
 from cog import Path
 from node import Node
-from weights_downloader import WeightsDownloader
 from urllib.error import URLError
 
 
 class ComfyUI:
     def __init__(self, server_address):
-        self.weights_downloader = WeightsDownloader()
         self.server_address = server_address
 
     def start_server(self, output_directory, input_directory):
         self.input_directory = input_directory
         self.output_directory = output_directory
-        self.apply_helper_methods("prepare", weights_downloader=self.weights_downloader)
 
         start_time = time.time()
         server_thread = threading.Thread(
@@ -84,36 +81,6 @@ class ComfyUI:
             method = getattr(module, method_name, None)
             if callable(method):
                 method(*args, **kwargs)
-
-    def handle_weights(self, workflow, weights_to_download=None):
-        if weights_to_download is None:
-            weights_to_download = []
-
-        print("Checking weights")
-        embeddings = self.weights_downloader.get_weights_by_type("EMBEDDINGS")
-        embedding_to_fullname = {emb.split(".")[0]: emb for emb in embeddings}
-        weights_filetypes = self.weights_downloader.supported_filetypes
-
-        for node in workflow.values():
-            self.apply_helper_methods("add_weights", weights_to_download, Node(node))
-
-            for input in node["inputs"].values():
-                if isinstance(input, str):
-                    if any(key in input for key in embedding_to_fullname):
-                        weights_to_download.extend(
-                            embedding_to_fullname[key]
-                            for key in embedding_to_fullname
-                            if key in input
-                        )
-                    elif any(input.endswith(ft) for ft in weights_filetypes):
-                        weights_to_download.append(input)
-
-        weights_to_download = list(set(weights_to_download))
-
-        for weight in weights_to_download:
-            self.weights_downloader.download_weights(weight)
-
-        print("====================================")
 
     def is_image_or_video_value(self, value):
         filetypes = [".png", ".jpg", ".jpeg", ".webp", ".mp4", ".webm"]
@@ -203,25 +170,6 @@ class ComfyUI:
                 "ComfyUI Error – Your workflow could not be run. This usually happens if you're trying to use an unsupported node. Check the logs for 'KeyError: ' details, and go to https://github.com/fofr/cog-comfyui to see the list of supported custom nodes."
             )
 
-    def _delete_corrupted_weights(self, error_data):
-        if "current_inputs" in error_data:
-            weights_to_delete = []
-            weights_filetypes = self.weights_downloader.supported_filetypes
-
-            for input_list in error_data["current_inputs"].values():
-                for input_value in input_list:
-                    if isinstance(input_value, str) and any(
-                        input_value.endswith(ft) for ft in weights_filetypes
-                    ):
-                        weights_to_delete.append(input_value)
-
-            for weight_file in list(set(weights_to_delete)):
-                self.weights_downloader.delete_weights(weight_file)
-
-            raise Exception(
-                "The weights for this workflow have been corrupted. They have been deleted and will be re-downloaded on the next run. Please try again."
-            )
-
     def wait_for_prompt_completion(self, workflow, prompt_id):
         while True:
             out = self.ws.recv()
@@ -229,15 +177,6 @@ class ComfyUI:
                 message = json.loads(out)
 
                 if message["type"] == "execution_error":
-                    error_data = message["data"]
-
-                    if (
-                        "exception_type" in error_data
-                        and error_data["exception_type"]
-                        == "safetensors_rust.SafetensorError"
-                    ):
-                        self._delete_corrupted_weights(error_data)
-
                     error_message = json.dumps(message, indent=2)
                     raise Exception(
                         f"There was an error executing your workflow:\n\n{error_message}"
@@ -272,7 +211,6 @@ class ComfyUI:
 
         self.handle_known_unsupported_nodes(wf)
         self.handle_inputs(wf)
-        self.handle_weights(wf)
         return wf
 
     def reset_execution_cache(self):

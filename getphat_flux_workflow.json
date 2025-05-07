@@ -10,16 +10,13 @@
   },
   "4": {
     "inputs": {
-      "text": "A woman on her knees on a bed, wearing pink sweatpants and a purple hoodie, facing the camera smiling",
-      "t5xxl": [
+      "clip": [
         "11",
         0
       ],
-      "clip_l": [
-        "11",
-        1
-      ],
-      "guidance": 2.0
+      "clip_l": "A woman on her knees on a bed, wearing pink sweatpants and a purple hoodie, facing the camera smiling",
+      "t5xxl": "A woman on her knees on a bed, wearing pink sweatpants and a purple hoodie, facing the camera smiling",
+      "guidance": 1.2
     },
     "class_type": "CLIPTextEncodeFlux",
     "_meta": {
@@ -28,16 +25,13 @@
   },
   "5": {
     "inputs": {
-      "text": "",
-      "t5xxl": [
+      "clip": [
         "11",
         0
       ],
-      "clip_l": [
-        "11",
-        1
-      ],
-      "guidance": 2.0
+      "clip_l": "",
+      "t5xxl": "",
+      "guidance": 0.8
     },
     "class_type": "CLIPTextEncodeFlux",
     "_meta": {
@@ -61,7 +55,7 @@
       "steps": 30,
       "cfg": 3.5,
       "sampler_name": "euler",
-      "scheduler": "normal",
+      "scheduler_name": "normal",
       "denoise": 1,
       "model": [
         "10",
@@ -115,13 +109,13 @@
     }
   },
   "10": {
-    "class_type": "FluxModDiffusionLoader",
-    "_meta": { "title": "Load GetPhat UNet" },
+    "class_type": "UNETLoader",
     "inputs": {
-      "ckpt_name": "getphat_v6.safetensors",
-      "guidance_name": "getphat_v6.safetensors",
-      "quant_mode": "bf16"
-    }
+      "unet_name": "getphat_v6.safetensors",
+      "model_type": "flux",
+      "weight_dtype": "bf16"
+    },
+    "_meta": { "title": "Load GetPhat V6 (Flux)" }
   },
   "11": {
     "inputs": {
