@@ -14,13 +14,11 @@
         "11",
         0
       ],
-      "clip_l": "A woman on her knees on a bed, wearing pink sweatpants and a purple hoodie, facing the camera smiling",
-      "t5xxl": "A woman on her knees on a bed, wearing pink sweatpants and a purple hoodie, facing the camera smiling",
-      "guidance": 1.2
+      "text": "A woman on her knees on a bed, wearing pink sweatpants and a purple hoodie, facing the camera smiling"
     },
-    "class_type": "CLIPTextEncodeFlux",
+    "class_type": "CLIPTextEncode",
     "_meta": {
-      "title": "CLIP Text Encode Flux (Prompt)"
+      "title": "CLIP Text Encode (Positive)"
     }
   },
   "5": {
@@ -29,13 +27,11 @@
         "11",
         0
       ],
-      "clip_l": "",
-      "t5xxl": "",
-      "guidance": 0.8
+      "text": ""
     },
-    "class_type": "CLIPTextEncodeFlux",
+    "class_type": "CLIPTextEncode",
     "_meta": {
-      "title": "CLIP Text Encode Flux (Negative)"
+      "title": "CLIP Text Encode (Negative)"
     }
   },
   "6": {
@@ -122,7 +118,7 @@
     "class_type": "BasicScheduler",
     "inputs": {
       "model": [
-        "10",
+        "61",
         0
       ],
       "scheduler": "sgm_uniform",
@@ -140,6 +136,10 @@
         "4",
         0
       ],
+      "negative_conditioning": [
+        "5",
+        0
+      ],
       "guidance": 4
     },
     "_meta": {
@@ -150,7 +150,7 @@
     "class_type": "BasicGuider",
     "inputs": {
       "model": [
-        "10",
+        "61",
         0
       ],
       "conditioning": [
@@ -188,6 +188,20 @@
     },
     "_meta": {
       "title": "Sampler Custom Advanced"
+    }
+  },
+  "61": {
+    "class_type": "ModelSamplingFlux",
+    "inputs": {
+      "model": [
+        "10",
+        0
+      ],
+      "width": 1024,
+      "height": 1024
+    },
+    "_meta": {
+      "title": "Model Sampling Flux"
     }
   }
 }

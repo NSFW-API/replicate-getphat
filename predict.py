@@ -112,23 +112,30 @@ class Predictor(BasePredictor):
         # ----- prompt nodes -------------------------------------------------
         # Update prompts in CLIP Text Encode nodes
         clip_encode_inputs = node(4)["inputs"]
-        clip_encode_inputs["clip_l"] = prompt
-        clip_encode_inputs["t5xxl"] = prompt
+        clip_encode_inputs["text"] = prompt  # Changed from clip_l/t5xxl to text
 
         neg_clip_encode_inputs = node(5)["inputs"]
-        neg_clip_encode_inputs["clip_l"] = negative_prompt
-        neg_clip_encode_inputs["t5xxl"] = negative_prompt
+        neg_clip_encode_inputs["text"] = negative_prompt  # Changed from clip_l/t5xxl to text
 
         # ----- latent size --------------------------------------------------
+        width_adjusted = self._nearest_multiple(width)
+        height_adjusted = self._nearest_multiple(height)
+
+        # Update EmptyLatentImage
         latent_inputs = node(6)["inputs"]
-        latent_inputs["width"] = self._nearest_multiple(width)
-        latent_inputs["height"] = self._nearest_multiple(height)
+        latent_inputs["width"] = width_adjusted
+        latent_inputs["height"] = height_adjusted
         latent_inputs["batch_size"] = 1
+
+        # Update ModelSamplingFlux with same dimensions
+        model_sampling_flux = node(61)["inputs"]
+        model_sampling_flux["width"] = width_adjusted
+        model_sampling_flux["height"] = height_adjusted
 
         # ----- sampler settings --------------------------------------------
         # RandomNoise
         noise_inputs = node(12)["inputs"]
-        noise_inputs["seed"] = seed
+        noise_inputs["noise_seed"] = seed
 
         # KSamplerSelect
         sampler_select_inputs = node(13)["inputs"]
@@ -137,14 +144,11 @@ class Predictor(BasePredictor):
         # BasicScheduler
         scheduler_inputs = node(14)["inputs"]
         scheduler_inputs["steps"] = steps
-        scheduler_inputs["schedule"] = scheduler
+        scheduler_inputs["scheduler"] = scheduler
 
-        # FluxGuidance
-        try:
-            node(15)["widgets"]["guidance"] = cfg
-        except KeyError:
-            # If there's no widgets field, create it
-            node(15)["widgets"] = {"guidance": cfg}
+        # FluxGuidance - Update CFG value
+        guidance_inputs = node(15)["inputs"]
+        guidance_inputs["guidance"] = cfg
 
         # 4. Run the workflow
         print("Loading workflow...")
