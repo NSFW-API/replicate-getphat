@@ -49,40 +49,10 @@
       "title": "Empty Latent Image"
     }
   },
-  "7": {
-    "inputs": {
-      "seed": 569737278829342,
-      "steps": 30,
-      "cfg": 3.5,
-      "sampler_name": "euler",
-      "scheduler_name": "normal",
-      "denoise": 1,
-      "model": [
-        "10",
-        0
-      ],
-      "positive": [
-        "4",
-        0
-      ],
-      "negative": [
-        "5",
-        0
-      ],
-      "latent_image": [
-        "6",
-        0
-      ]
-    },
-    "class_type": "KSampler",
-    "_meta": {
-      "title": "KSampler"
-    }
-  },
   "8": {
     "inputs": {
       "samples": [
-        "7",
+        "17",
         0
       ],
       "vae": [
@@ -113,7 +83,7 @@
     "inputs": {
       "unet_name": "getphat_v6.safetensors",
       "model_type": "flux",
-      "weight_dtype": "bf16"
+      "weight_dtype": "default"
     },
     "_meta": { "title": "Load GetPhat V6 (Flux)" }
   },
@@ -126,6 +96,98 @@
     "class_type": "DualCLIPLoader",
     "_meta": {
       "title": "Load Dual CLIP"
+    }
+  },
+  "12": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "seed": 324086323552613
+    },
+    "_meta": {
+      "title": "Random Noise"
+    }
+  },
+  "13": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "dpmpp_2m"
+    },
+    "_meta": {
+      "title": "KSampler Select"
+    }
+  },
+  "14": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": [
+        "10",
+        0
+      ],
+      "schedule": "sgm_uniform",
+      "steps": 35,
+      "sigma_min": 1
+    },
+    "_meta": {
+      "title": "Basic Scheduler"
+    }
+  },
+  "15": {
+    "class_type": "FluxGuidance",
+    "inputs": {
+      "conditioning": [
+        "4",
+        0
+      ]
+    },
+    "widgets": {
+      "guidance": 4
+    },
+    "_meta": {
+      "title": "Flux Guidance"
+    }
+  },
+  "16": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": [
+        "10",
+        0
+      ],
+      "conditioning": [
+        "15",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Basic Guider"
+    }
+  },
+  "17": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": [
+        "12",
+        0
+      ],
+      "guider": [
+        "16",
+        0
+      ],
+      "sampler": [
+        "13",
+        0
+      ],
+      "sigmas": [
+        "14",
+        0
+      ],
+      "latent_image": [
+        "6",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Sampler Custom Advanced"
     }
   }
 }

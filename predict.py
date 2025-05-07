@@ -83,11 +83,11 @@ class Predictor(BasePredictor):
             negative_prompt: str = Input(default="", description="Optional negative."),
             width: int = Input(default=1024, ge=64, le=1536),
             height: int = Input(default=1024, ge=64, le=1536),
-            steps: int = Input(default=25, ge=1, le=150),
-            cfg: float = Input(default=5.0, ge=1.0, le=20.0),
-            sampler_name: str = Input(default="euler",
-                                      choices=["euler", "euler_ancestral", "heun", "dpmpp_2s_ancestral", "uni_pc"]),
-            scheduler: str = Input(default="normal", choices=["beta", "normal"]),
+            steps: int = Input(default=35, ge=1, le=150),
+            cfg: float = Input(default=4.0, ge=1.0, le=20.0),
+            sampler_name: str = Input(default="dpmpp_2m",
+                                      choices=["dpmpp_2m", "euler", "euler_ancestral", "heun", "dpmpp_2s_ancestral"]),
+            scheduler: str = Input(default="sgm_uniform", choices=["sgm_uniform", "normal", "karras", "exponential"]),
             seed: int = Input(default=0, description="0 = random"),
     ) -> List[Path]:
 
@@ -110,7 +110,7 @@ class Predictor(BasePredictor):
             return by_id[str(idx)]
 
         # ----- prompt nodes -------------------------------------------------
-        # Update both the legacy "text" field and the new fields for compatibility
+        # Update prompts in CLIP Text Encode nodes
         clip_encode_inputs = node(4)["inputs"]
         clip_encode_inputs["clip_l"] = prompt
         clip_encode_inputs["t5xxl"] = prompt
@@ -126,13 +126,25 @@ class Predictor(BasePredictor):
         latent_inputs["batch_size"] = 1
 
         # ----- sampler settings --------------------------------------------
-        sampler_inputs = node(7)["inputs"]
-        sampler_inputs["seed"] = seed
-        sampler_inputs["steps"] = steps
-        sampler_inputs["cfg"] = cfg
-        sampler_inputs["sampler_name"] = sampler_name
-        sampler_inputs["scheduler_name"] = scheduler
-        sampler_inputs["denoise"] = 1.0
+        # RandomNoise
+        noise_inputs = node(12)["inputs"]
+        noise_inputs["seed"] = seed
+
+        # KSamplerSelect
+        sampler_select_inputs = node(13)["inputs"]
+        sampler_select_inputs["sampler_name"] = sampler_name
+
+        # BasicScheduler
+        scheduler_inputs = node(14)["inputs"]
+        scheduler_inputs["steps"] = steps
+        scheduler_inputs["schedule"] = scheduler
+
+        # FluxGuidance
+        try:
+            node(15)["widgets"]["guidance"] = cfg
+        except KeyError:
+            # If there's no widgets field, create it
+            node(15)["widgets"] = {"guidance": cfg}
 
         # 4. Run the workflow
         print("Loading workflow...")
