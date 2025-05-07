@@ -136,10 +136,6 @@
         "4",
         0
       ],
-      "negative_conditioning": [
-        "5",
-        0
-      ],
       "guidance": 4
     },
     "_meta": {
@@ -191,17 +187,14 @@
     }
   },
   "61": {
-    "class_type": "ModelSamplingFlux",
-    "inputs": {
-      "model": [
-        "10",
-        0
-      ],
-      "width": 1024,
-      "height": 1024
-    },
-    "_meta": {
-      "title": "Model Sampling Flux"
-    }
-  }
+  "class_type": "ModelSamplingFlux",
+  "inputs": {
+    "model":  ["10", 0],
+    "width":  1024,
+    "height": 1024,
+    "base_shift": 1.15,
+    "max_shift":  0.5
+  },
+  "_meta": { "title": "Model Sampling Flux" }
+}
 }
